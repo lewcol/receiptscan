@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase
 @Database(entities = [Receipt::class, Item::class], version = 1, exportSchema = false)
 abstract class ReceiptDb: RoomDatabase() {
     abstract fun receiptDao(): ReceiptDao
+
     companion object {
         @Volatile
         private var INSTANCE: ReceiptDb? = null
