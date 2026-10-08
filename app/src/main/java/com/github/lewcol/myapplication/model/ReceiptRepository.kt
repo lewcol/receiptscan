@@ -4,11 +4,12 @@ import kotlinx.coroutines.flow.Flow
 
 class ReceiptRepository(private val receiptDao: ReceiptDao) {
     val receipts: Flow<List<ReceiptWithItems>> = receiptDao.getReceiptWithItems()
-    suspend fun insertReceipt(receipt: Receipt) : Int = receiptDao.insertReceipt(receipt)
+    suspend fun insertReceipt(receipt: Receipt) : Long = receiptDao.insertReceipt(receipt)
     suspend fun insertItem(item: Item) = receiptDao.insertItem(item)
     suspend fun updateReceipt(receipt: Receipt) = receiptDao.updateReceipt(receipt)
     suspend fun updateItem(item: Item) = receiptDao.updateItem(item)
     suspend fun deleteReceipt(receipt: Receipt) = receiptDao.deleteReceipt(receipt)
-    suspend fun deleteReceiptById(id: Int) = receiptDao.deleteReceiptById(id)
+    suspend fun deleteReceiptById(id: Long) = receiptDao.deleteReceiptById(id)
+    suspend fun upsertReceiptWithItems(receipt: Receipt, items: List<Item>): Long = receiptDao.upsertReceiptWithItems(receipt, items)
     suspend fun deleteItem(item: Item) = receiptDao.deleteItem(item)
 }
