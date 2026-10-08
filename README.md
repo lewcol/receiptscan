@@ -15,3 +15,7 @@ Create Reports - Create reports for receipts by store or date range, including t
 ## Credit
 @lake-hope on GitHub for the brands.txt dataset used to identify store names - no modifications were made to this dataset.
 https://github.com/lake-hope/brandnames/tree/master/brands.txt
+
+## Demo
+https://github.com/user-attachments/assets/fa56a02d-6510-488d-a5b3-da2cc1545e64
+
