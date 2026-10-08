@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface ReceiptDao {
     // Insert a new receipt
     @Insert(onConflict=OnConflictStrategy.REPLACE)
-    suspend fun insertReceipt(receipt: Receipt) : Int
+    suspend fun insertReceipt(receipt: Receipt) : Long
 
     // Insert a new receipt item
     @Insert(onConflict=OnConflictStrategy.REPLACE)
@@ -38,9 +38,24 @@ interface ReceiptDao {
 
     // Delete receipt by id
     @Query("DELETE FROM receipts WHERE receiptId = :id")
-    suspend fun deleteReceiptById(id: Int)
+    suspend fun deleteReceiptById(id: Long) : Int
+
+    // Delete items associated with receipt
+    @Query("DELETE FROM items WHERE itemReceiptId = :id")
+    suspend fun deleteReceiptItems(id: Long)
 
     // Delete receipt item
     @Delete
     suspend fun deleteItem(item: Item)
+
+    @Transaction
+    suspend fun upsertReceiptWithItems(receipt: Receipt, items: List<Item>): Long {
+        val receiptId = insertReceipt(receipt)
+        deleteReceiptItems(receiptId)
+        items.forEach { item ->
+            val itemToInsert = item.copy(itemReceiptId = receiptId)
+            insertItem(itemToInsert)
+        }
+        return receiptId // Return the stable Receipt ID
+    }
 }

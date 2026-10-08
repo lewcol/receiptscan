@@ -1,5 +1,8 @@
 package com.github.lewcol.myapplication.ui.main
 
+import android.R.attr.defaultValue
+import android.R.attr.type
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,11 +21,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.github.lewcol.myapplication.R
+import com.github.lewcol.myapplication.ui.screens.ReceiptDetails
 import com.github.lewcol.myapplication.ui.screens.ReceiptList
+import com.github.lewcol.myapplication.ui.screens.Reports
+import com.github.lewcol.myapplication.ui.screens.Scan
+import com.github.lewcol.myapplication.viewmodel.OCRViewModel
 import com.github.lewcol.myapplication.viewmodel.ReceiptViewModel
 
 sealed class Screen(val route: String) {
@@ -39,10 +49,10 @@ data class NavItem(
 )
 
 @Composable
-fun MainScaffold(viewModel: ReceiptViewModel) {
+fun MainScaffold(context: Context, receiptViewModel: ReceiptViewModel, ocrViewModel: OCRViewModel, onReportGenerated: (String) -> Unit) {
     val navController = rememberNavController()
     val navItemList = listOf(
-        NavItem(label="Task List", icon= Icons.AutoMirrored.Rounded.List, screen=Screen.ReceiptList),
+        NavItem(label="Receipt List", icon= Icons.AutoMirrored.Rounded.List, screen=Screen.ReceiptList),
         NavItem(label="Scan", icon= ImageVector.vectorResource(R.drawable.rounded_add_a_photo_24), screen=Screen.Scan),
         NavItem(label="Reports", icon=ImageVector.vectorResource(R.drawable.outline_assignment_24), screen=Screen.Reports)
     )
@@ -78,13 +88,19 @@ fun MainScaffold(viewModel: ReceiptViewModel) {
             startDestination=Screen.ReceiptList.route,
             modifier=Modifier.padding(innerPadding)
         ) {
-            composable(Screen.ReceiptList.route) { ReceiptList(navController, viewModel) }
-            //composable(Screen.ReceiptDetails.route) { backStackEntry ->
-            //    val id = backStackEntry.arguments?.getString("id")?.toInt()
-            //    id?.let { ReceiptDetails(navController, viewModel, it) }
-            //}
-            //composable(Screen.Reports.route) { Reports(viewModel) }
-            //composable(Screen.Scan.route) { Scan(viewModel) }
+            composable(Screen.ReceiptList.route) { ReceiptList(navController, receiptViewModel) }
+            composable(
+                route = Screen.ReceiptDetails.route,
+                arguments = listOf(navArgument("id") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                })
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getLong("id")
+                ReceiptDetails(navController, receiptViewModel, id)
+            }
+            composable(Screen.Reports.route) { Reports(context, receiptViewModel, onReportGenerated) }
+            composable(Screen.Scan.route) { Scan(context, navController, ocrViewModel) }
         }
     }
 }
